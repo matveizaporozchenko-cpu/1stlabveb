@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temple UA | Каталог CBD продукції</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">Temple UA</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Головна</a></li>
+                <li><a href="products.html">Каталог</a></li>
+                <li><a href="contact.html">Контакти</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="content-section">
+        <h1 class="section-title">Наш Асортимент</h1>
+        
+        <div class="products-grid">
+            <div class="product-card">
+                <div class="product-image-placeholder">
+                    CBD OIL
+                </div>
+                <div class="product-details">
+                    <h3>CBD Олія 10% Full Spectrum</h3>
+                    <p>Класична формула для зняття тривожності та покращення якості сну. 30 мл.</p>
+                    <div class="product-bottom">
+                        <span class="price">1 200 грн</span>
+                        <a href="#" class="buy-btn">Купити</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-image-placeholder" style="background-color: var(--light-green); color: var(--primary-green);">
+                    GUMMIES
+                </div>
+                <div class="product-details">
+                    <h3>CBD Желейки "Вечірній релакс"</h3>
+                    <p>Смачні желейні ведмедики з мелатоніном для легкого засинання. 30 шт.</p>
+                    <div class="product-bottom">
+                        <span class="price">850 грн</span>
+                        <a href="#" class="buy-btn">Купити</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-image-placeholder">
+                    BALM
+                </div>
+                <div class="product-details">
+                    <h3>Відновлюючий CBD Бальзам</h3>
+                    <p>Для локального нанесення на м'язи та суглоби після тренувань.</p>
+                    <div class="product-bottom">
+                        <span class="price">980 грн</span>
+                        <a href="#" class="buy-btn">Купити</a>
+                    </div>
+                </div>
+            </div>
+            
+             <div class="product-card">
+                <div class="product-image-placeholder" style="background-color: var(--light-green); color: var(--primary-green);">
+                    VAPE
+                </div>
+                <div class="product-details">
+                    <h3>CBD Vape Pen (Одноразовий)</h3>
+                    <p>Швидкий ефект релаксації. Смак маракуї, 500 затяжок.</p>
+                    <div class="product-bottom">
+                        <span class="price">700 грн</span>
+                        <a href="#" class="buy-btn">Купити</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <div id="order-modal" class="modal">
+            <div class="modal-content">
+                <span class="close-btn">&times;</span>
+                <h2>Оформлення замовлення</h2>
+                <p id="modal-product-name" style="color: var(--primary-green); font-weight: bold; margin: 10px 0;"></p>
+                <p id="modal-product-price" style="margin-bottom: 20px;"></p>
+                
+                <form id="order-form" class="contact-form" style="box-shadow: none; padding: 0;">
+                    <input type="text" id="order-name" placeholder="Ваше ім'я" required>
+                    <input type="tel" id="order-phone" placeholder="Номер телефону" required>
+                    <button type="submit" class="submit-btn" id="confirm-order-btn">Підтвердити замовлення</button>
+                </form>
+                <p id="order-message" style="text-align: center; margin-top: 15px; font-weight: bold;"></p>
+            </div>
+        </div>
+    <footer>
+        <p>&copy; 2026 Temple UA. Натуральний шлях до релаксу.</p>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>
