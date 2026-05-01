@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Temple UA | Каталог CBD продукції</title>
+    <title>Temple UA | Reactive Catalog</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 </head>
 <body>
     <header>
@@ -18,85 +19,97 @@
         </nav>
     </header>
 
-    <main class="content-section">
-        <h1 class="section-title">Наш Асортимент</h1>
-        
+    <main id="app" class="content-section">
+        <h1 class="section-title">Магазин Temple UA</h1>
+
+        <div class="search-container" style="max-width: 600px; margin: 0 auto 40px; display: flex; gap: 15px; align-items: center;">
+            <input type="text" v-model="searchQuery" placeholder="Шукати продукцію..." 
+                   style="flex: 1; padding: 12px 25px; border-radius: 30px; border: 1px solid #ddd; outline: none;">
+            <div style="color: #666; font-size: 0.9rem;">Знайдено: <strong>{{ filteredProducts.length }}</strong></div>
+        </div>
+
         <div class="products-grid">
-            <div class="product-card">
-                <div class="product-image-placeholder">
-                    CBD OIL
-                </div>
+            <div v-for="product in filteredProducts" :key="product.id" class="product-card">
+                <div class="product-image-placeholder">{{ product.category }}</div>
                 <div class="product-details">
-                    <h3>CBD Олія 10% Full Spectrum</h3>
-                    <p>Класична формула для зняття тривожності та покращення якості сну. 30 мл.</p>
+                    <h3>{{ product.name }}</h3>
+                    <p>{{ product.description }}</p>
                     <div class="product-bottom">
-                        <span class="price">1 200 грн</span>
-                        <a href="#" class="buy-btn">Купити</a>
+                        <span class="price">{{ product.price }} грн</span>
+                        <button @click="addToCart(product)" class="buy-btn">Додати</button>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="product-card">
-                <div class="product-image-placeholder" style="background-color: var(--light-green); color: var(--primary-green);">
-                    GUMMIES
-                </div>
-                <div class="product-details">
-                    <h3>CBD Желейки "Вечірній релакс"</h3>
-                    <p>Смачні желейні ведмедики з мелатоніном для легкого засинання. 30 шт.</p>
-                    <div class="product-bottom">
-                        <span class="price">850 грн</span>
-                        <a href="#" class="buy-btn">Купити</a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image-placeholder">
-                    BALM
-                </div>
-                <div class="product-details">
-                    <h3>Відновлюючий CBD Бальзам</h3>
-                    <p>Для локального нанесення на м'язи та суглоби після тренувань.</p>
-                    <div class="product-bottom">
-                        <span class="price">980 грн</span>
-                        <a href="#" class="buy-btn">Купити</a>
-                    </div>
-                </div>
-            </div>
+        <section v-if="cart.length > 0" class="cart-section" style="margin-top: 60px; background: #fff; padding: 40px; border-radius: 15px; box-shadow: var(--shadow);">
+            <h2 style="color: var(--primary-green); margin-bottom: 25px;">Ваш вибір</h2>
             
-             <div class="product-card">
-                <div class="product-image-placeholder" style="background-color: var(--light-green); color: var(--primary-green);">
-                    VAPE
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="text-align: left; border-bottom: 2px solid #f0f0f0;">
+                        <th style="padding: 15px;">Товар</th>
+                        <th>Ціна</th>
+                        <th>Кількість</th>
+                        <th>Дія</th>
+                    </tr>
+                </thead>
+                <transition-group name="cart-list" tag="tbody">
+                    <tr v-for="item in cart" :key="item.id" class="cart-item" style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 15px;">{{ item.name }}</td>
+                        <td>{{ item.price }} грн</td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <button @click="updateQuantity(item, -1)" style="width:30px; height:30px; cursor:pointer;">-</button>
+                                <span>{{ item.quantity }}</span>
+                                <button @click="updateQuantity(item, 1)" style="width:30px; height:30px; cursor:pointer;">+</button>
+                            </div>
+                        </td>
+                        <td><button @click="removeFromCart(item)" style="color: #e74c3c; border:none; background:none; cursor:pointer; font-weight:bold;">Видалити</button></td>
+                    </tr>
+                </transition-group>
+            </table>
+
+            <div style="margin-top: 30px; display: flex; justify-content: space-between; align-items: flex-end; border-top: 2px solid #f0f0f0; padding-top: 20px;">
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" v-model="promoInput" placeholder="Промокод (TEMPLE10)" style="padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    <button @click="applyPromo" style="padding: 10px 20px; background: var(--accent-gold); color: white; border: none; border-radius: 5px; cursor:pointer;">Застосувати</button>
                 </div>
-                <div class="product-details">
-                    <h3>CBD Vape Pen (Одноразовий)</h3>
-                    <p>Швидкий ефект релаксації. Смак маракуї, 500 затяжок.</p>
-                    <div class="product-bottom">
-                        <span class="price">700 грн</span>
-                        <a href="#" class="buy-btn">Купити</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
-    <div id="order-modal" class="modal">
-            <div class="modal-content">
-                <span class="close-btn">&times;</span>
-                <h2>Оформлення замовлення</h2>
-                <p id="modal-product-name" style="color: var(--primary-green); font-weight: bold; margin: 10px 0;"></p>
-                <p id="modal-product-price" style="margin-bottom: 20px;"></p>
                 
-                <form id="order-form" class="contact-form" style="box-shadow: none; padding: 0;">
-                    <input type="text" id="order-name" placeholder="Ваше ім'я" required>
-                    <input type="tel" id="order-phone" placeholder="Номер телефону" required>
-                    <button type="submit" class="submit-btn" id="confirm-order-btn">Підтвердити замовлення</button>
-                </form>
-                <p id="order-message" style="text-align: center; margin-top: 15px; font-weight: bold;"></p>
+                <div style="text-align: right;">
+                    <div v-if="discount > 0" style="color: #999; text-decoration: line-through;">Сума: {{ rawTotal }} грн</div>
+                    <div style="font-size: 2rem; font-weight: bold; color: var(--primary-green);">Разом: {{ totalSum }} грн</div>
+                    <button @click="openCheckout" class="btn" style="margin-top: 15px; width: 100%;">Оформити замовлення</button>
+                </div>
             </div>
-        </div>
+        </section>
+
+        <transition name="fade">
+            <div v-if="isModalOpen" class="modal" style="display: flex;">
+                <div class="modal-content">
+                    <span class="close-btn" @click="isModalOpen = false">&times;</span>
+                    <h2>Підтвердження</h2>
+                    <p>Ви замовляєте товарів на суму: <strong>{{ totalSum }} грн</strong></p>
+                    
+                    <form @submit.prevent="submitOrder" class="contact-form" style="box-shadow: none; padding: 0; margin-top: 20px;">
+                        <input type="text" v-model="orderData.name" placeholder="Ваше ім'я" required>
+                        <input type="tel" v-model="orderData.phone" placeholder="Номер телефону" required>
+                        <button type="submit" class="submit-btn" :disabled="isSubmitting">
+                            {{ isSubmitting ? 'Відправка...' : 'Підтвердити замовлення' }}
+                        </button>
+                    </form>
+                    <p v-if="orderStatus" :style="{ color: orderStatus.color, textAlign: 'center', marginTop: '15px' }">
+                        {{ orderStatus.text }}
+                    </p>
+                </div>
+            </div>
+        </transition>
+    </main>
+
     <footer>
         <p>&copy; 2026 Temple UA. Натуральний шлях до релаксу.</p>
     </footer>
+
     <script src="script.js"></script>
 </body>
 </html>

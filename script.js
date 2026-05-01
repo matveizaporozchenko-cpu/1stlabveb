@@ -1,124 +1,95 @@
-document.addEventListener('DOMContentLoaded', () => {
+const { createApp } = Vue;
 
-    /* ==========================================
-       1. ЛОГІКА МОДАЛЬНОГО ВІКНА ТА ЗАМОВЛЕННЯ
-       ========================================== */
-    const modal = document.getElementById('order-modal');
-    const closeBtn = document.querySelector('.close-btn');
-    const buyButtons = document.querySelectorAll('.buy-btn');
-    const orderForm = document.getElementById('order-form');
-    
-    // Елементи всередині модалки для підміни тексту
-    const modalProductName = document.getElementById('modal-product-name');
-    const modalProductPrice = document.getElementById('modal-product-price');
-    const orderMessage = document.getElementById('order-message');
-
-    let currentProduct = {}; // Тут будемо зберігати товар, який купують
-
-    // Відкриття модалки при кліку на "Купити"
-    buyButtons.forEach(button => {
-        button.addEventListener('click', function(event) {
-            event.preventDefault(); 
-            
-            // Знаходимо батьківський блок .product-details, щоб витягнути назву і ціну
-            const productCard = this.closest('.product-details');
-            currentProduct.name = productCard.querySelector('h3').textContent;
-            currentProduct.price = productCard.querySelector('.price').textContent;
-
-            // Підставляємо дані у модальне вікно
-            modalProductName.textContent = currentProduct.name;
-            modalProductPrice.textContent = `До сплати: ${currentProduct.price}`;
-            
-            // Показуємо модалку (змінюємо display з none на flex)
-            if(modal) modal.style.display = 'flex';
-        });
-    });
-
-    // Закриття модалки на хрестик
-    if(closeBtn) {
-        closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-            orderMessage.textContent = ''; // Очищаємо повідомлення
-        });
-    }
-
-    // Закриття модалки при кліку поза її межами (на темний фон)
-    window.addEventListener('click', (event) => {
-        if (event.target === modal) {
-            modal.style.display = 'none';
-            orderMessage.textContent = '';
+createApp({
+    data() {
+        return {
+            searchQuery: '',
+            promoInput: '',
+            discount: 0,
+            isModalOpen: false,
+            isSubmitting: false,
+            orderStatus: null,
+            orderData: { name: '', phone: '' },
+            products: [
+                { id: 1, name: 'CBD Олія 10%', price: 1200, category: 'OIL', description: 'Преміальна олія повного спектру.' },
+                { id: 2, name: 'CBD Желейки', price: 850, category: 'GUMMIES', description: 'Смак малини та глибокий спокій.' },
+                { id: 3, name: 'CBD Бальзам', price: 980, category: 'BALM', description: 'Відновлення м’язів та суглобів.' },
+                { id: 4, name: 'CBD Vape Pen', price: 700, category: 'VAPE', description: 'Миттєвий ефект релаксації.' }
+            ],
+            cart: JSON.parse(localStorage.getItem('temple_cart')) || []
         }
-    });
-
-    // Відправка замовлення на сервер (Асинхронний запит)
-    if (orderForm) {
-        orderForm.addEventListener('submit', function(event) {
-            event.preventDefault(); // Зупиняємо стандартну відправку форми
-
-            const customerName = document.getElementById('order-name').value;
-            const customerPhone = document.getElementById('order-phone').value;
-            const submitBtn = document.getElementById('confirm-order-btn');
-
-            // Формуємо об'єкт (JSON) з даними замовлення
-            const orderData = {
-                product: currentProduct.name,
-                price: currentProduct.price,
-                customer: customerName,
-                phone: customerPhone
-            };
-
-            // Міняємо текст кнопки під час завантаження
-            submitBtn.textContent = 'Відправляємо...';
-            submitBtn.disabled = true;
-
-            // Використовуємо fetch API для відправки запиту на тестовий сервер
+    },
+    computed: {
+        filteredProducts() {
+            return this.products.filter(p => 
+                p.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+            );
+        },
+        rawTotal() {
+            return this.cart.reduce((t, i) => t + (i.price * i.quantity), 0);
+        },
+        totalSum() {
+            return Math.round(this.rawTotal * (1 - this.discount));
+        }
+    },
+    methods: {
+        addToCart(product) {
+            const item = this.cart.find(i => i.id === product.id);
+            if (item) item.quantity++;
+            else this.cart.push({ ...product, quantity: 1 });
+            this.saveCart();
+        },
+        updateQuantity(item, amount) {
+            item.quantity += amount;
+            if (item.quantity <= 0) this.removeFromCart(item);
+            this.saveCart();
+        },
+        removeFromCart(item) {
+            this.cart = this.cart.filter(i => i.id !== item.id);
+            this.saveCart();
+        },
+        applyPromo() {
+            if(this.promoInput.toUpperCase() === 'TEMPLE10') {
+                this.discount = 0.10;
+                alert("Промокод застосовано! Знижка 10%");
+            } else {
+                alert("Невірний код");
+            }
+        },
+        openCheckout() {
+            this.isModalOpen = true;
+            this.orderStatus = null;
+        },
+        submitOrder() {
+            this.isSubmitting = true;
+            
+            // Імітація AJAX запиту
             fetch('https://jsonplaceholder.typicode.com/posts', {
                 method: 'POST',
-                body: JSON.stringify(orderData),
-                headers: {
-                    'Content-type': 'application/json; charset=UTF-8',
-                },
+                body: JSON.stringify({
+                    cart: this.cart,
+                    total: this.totalSum,
+                    customer: this.orderData
+                }),
+                headers: { 'Content-type': 'application/json' }
             })
-            .then(response => response.json()) // Отримуємо проміс
-            .then(data => {
-                // Сервер відповів успішно
-                console.log('Відповідь сервера:', data); // Можеш глянути це в консолі розробника (F12)
-                orderMessage.textContent = '✅ Замовлення успішно оформлено! Ми вам зателефонуємо.';
-                orderMessage.style.color = 'green';
-                orderForm.reset();
-                submitBtn.textContent = 'Підтвердити замовлення';
-                submitBtn.disabled = false;
-                
-                // Автоматично закриваємо вікно через 3 секунди
+            .then(() => {
+                this.orderStatus = { text: '✅ Замовлення прийнято! Дякуємо.', color: 'green' };
                 setTimeout(() => {
-                    modal.style.display = 'none';
-                    orderMessage.textContent = '';
-                }, 3000);
+                    this.cart = [];
+                    this.saveCart();
+                    this.isModalOpen = false;
+                    this.isSubmitting = false;
+                    this.orderData = { name: '', phone: '' };
+                }, 2500);
             })
-            .catch(error => {
-                // Якщо сталась помилка мережі
-                console.error('Помилка:', error);
-                orderMessage.textContent = '❌ Помилка відправки. Спробуйте пізніше.';
-                orderMessage.style.color = 'red';
-                submitBtn.textContent = 'Підтвердити замовлення';
-                submitBtn.disabled = false;
+            .catch(() => {
+                this.orderStatus = { text: '❌ Помилка мережі.', color: 'red' };
+                this.isSubmitting = false;
             });
-        });
+        },
+        saveCart() {
+            localStorage.setItem('temple_cart', JSON.stringify(this.cart));
+        }
     }
-
-    /* ==========================================
-       2. ВАЛІДАЦІЯ ФОРМИ КОНТАКТІВ (залишається як була)
-       ========================================== */
-    const contactForm = document.getElementById('cbd-form');
-    const formMessage = document.getElementById('form-message');
-
-    if (contactForm) {
-        contactForm.addEventListener('submit', function(event) {
-            event.preventDefault(); 
-            const name = document.getElementById('user-name').value;
-            formMessage.textContent = `Дякуємо, ${name}! Ваше повідомлення відправлено.`;
-            formMessage.style.color = 'green';
-            contactForm.reset();
-        });
-    }
-});
+}).mount('#app');

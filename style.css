@@ -363,3 +363,12 @@ footer {
 .close-btn:hover {
     color: var(--primary-green);
 }
+
+
+.cart-list-enter-active, .cart-list-leave-active {
+  transition: all 0.5s ease;
+}
+.cart-list-enter-from, .cart-list-leave-to {
+  opacity: 0;
+  transform: translateX(30px);
+}
