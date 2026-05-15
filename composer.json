@@ -1,0 +1,8 @@
+{
+  "name": "temple-ua/site",
+  "autoload": {
+    "psr-4": {
+      "TempleUA\\": "src/"
+    }
+  }
+}
